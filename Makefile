@@ -70,7 +70,7 @@ wasm_MODE = wasmtime
 LOCCOUNT = loccount
 
 # Extra options to pass to runtest.py
-TEST_OPTS =
+TEST_OPTS = --log-file foobar.log 
 
 # Test with previous test files not just the test files for the
 # current step. Step 0 and 1 tests are special and not included in
@@ -94,7 +94,7 @@ IMPLS = ada ada.2 awk bash basic bbc-basic c chuck clojure coffee common-lisp cp
 	guile haskell haxe hy io java js jq julia kotlin livescript logo lua make mal \
 	matlab miniMAL nasm nim objc objpascal ocaml perl perl6 php picolisp pike plpgsql \
 	plsql powershell ps python python.2 r racket rexx rpython ruby rust scala scheme skew \
-	swift swift3 swift4 swift5 tcl ts vala vb vhdl vimscript wasm wren yorick xslt zig aliip
+	swift swift3 swift4 swift5 tcl ts vala vb vhdl vimscript wasm wren yorick xslt zig lithp
 
 EXTENSION = .mal
 
@@ -185,7 +185,7 @@ scheme_STEP_TO_PROG_cyclone     = impls/scheme/$($(1))
 scheme_STEP_TO_PROG_foment      = impls/scheme/$($(1)).scm
 
 # The one I'm trying to write...
-aliip_STEP_TO_PROG =         impls/aliip/$($(1)).py
+lithp_STEP_TO_PROG =         impls/lithp/$($(1)).py
 
 # Map of step (e.g. "step8") to executable file for that step
 ada_STEP_TO_PROG =           impls/ada/$($(1))

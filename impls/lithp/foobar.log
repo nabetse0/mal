@@ -1,0 +1,724 @@
+Testing read of numbers
+TEST: '1\r' -> ['',1] -> FAIL (line 3):
+    Expected : '.*\n1\\\r'
+    Got      : '1\n\n1'
+TEST: '7\r' -> ['',7] -> FAIL (line 5):
+    Expected : '.*\n7\\\r'
+    Got      : '7\n\n'
+TEST: '  7   \r' -> ['',7] -> FAIL (line 7):
+    Expected : '.*\n7\\\r'
+    Got      : '  7   \n\n7'
+TEST: '-123\r' -> ['',-123] -> FAIL (line 9):
+    Expected : '.*\n\\-123\\\r'
+    Got      : '-123\n\n'
+Testing read of symbols
+TEST: '+\r' -> ['',+] -> FAIL (line 14):
+    Expected : '.*\n\\+\\\r'
+    Got      : '+\n\n7'
+TEST: 'abc\r' -> ['',abc] -> FAIL (line 16):
+    Expected : '.*\nabc\\\r'
+    Got      : 'abc\n\n'
+TEST: '   abc   \r' -> ['',abc] -> FAIL (line 18):
+    Expected : '.*\nabc\\\r'
+    Got      : '   abc   \n\n-123'
+TEST: 'abc5\r' -> ['',abc5] -> FAIL (line 20):
+    Expected : '.*\nabc5\\\r'
+    Got      : 'abc5\n\n'
+TEST: 'abc-def\r' -> ['',abc-def] -> FAIL (line 22):
+    Expected : '.*\nabc\\-def\\\r'
+    Got      : 'abc-def\n\n+'
+Testing non-numbers starting with a dash.
+TEST: '-\r' -> ['',-] -> FAIL (line 26):
+    Expected : '.*\n\\-\\\r'
+    Got      : '-\n\n'
+TEST: '-abc\r' -> ['',-abc] -> FAIL (line 28):
+    Expected : '.*\n\\-abc\\\r'
+    Got      : '-abc\n\nabc'
+TEST: '->>\r' -> ['',->>] -> FAIL (line 30):
+    Expected : '.*\n\\->>\\\r'
+    Got      : '->>\n\n'
+Testing read of lists
+TEST: '(+ 1 2)\r' -> ['',(+ 1 2)] -> FAIL (line 34):
+    Expected : '.*\n\\(\\+\\ 1\\ 2\\)\\\r'
+    Got      : '(+ 1 2)\n\nabc'
+TEST: '()\r' -> ['',()] -> FAIL (line 36):
+    Expected : '.*\n\\(\\)\\\r'
+    Got      : '()\n\n'
+TEST: '( )\r' -> ['',()] -> FAIL (line 38):
+    Expected : '.*\n\\(\\)\\\r'
+    Got      : '( )\n\nabc5'
+TEST: '(nil)\r' -> ['',(nil)] -> FAIL (line 40):
+    Expected : '.*\n\\(nil\\)\\\r'
+    Got      : '(nil)\n\n'
+TEST: '((3 4))\r' -> ['',((3 4))] -> FAIL (line 42):
+    Expected : '.*\n\\(\\(3\\ 4\\)\\)\\\r'
+    Got      : '((3 4))\n\nabc-def'
+TEST: '(+ 1 (+ 2 3))\r' -> ['',(+ 1 (+ 2 3))] -> FAIL (line 44):
+    Expected : '.*\n\\(\\+\\ 1\\ \\(\\+\\ 2\\ 3\\)\\)\\\r'
+    Got      : '(+ 1 (+ 2 3))\n\n'
+TEST: '  ( +   1   (+   2 3   )   )  \r' -> ['',(+ 1 (+ 2 3))] -> FAIL (line 46):
+    Expected : '.*\n\\(\\+\\ 1\\ \\(\\+\\ 2\\ 3\\)\\)\\\r'
+    Got      : '  ( +   1   (+   2 3   )   )  \n\n-'
+TEST: '(* 1 2)\r' -> ['',(* 1 2)] -> FAIL (line 48):
+    Expected : '.*\n\\(\\*\\ 1\\ 2\\)\\\r'
+    Got      : '(* 1 2)\n\n'
+TEST: '(** 1 2)\r' -> ['',(** 1 2)] -> FAIL (line 50):
+    Expected : '.*\n\\(\\*\\*\\ 1\\ 2\\)\\\r'
+    Got      : '(** 1 2)\n\n-abc'
+TEST: '(* -3 6)\r' -> ['',(* -3 6)] -> FAIL (line 52):
+    Expected : '.*\n\\(\\*\\ \\-3\\ 6\\)\\\r'
+    Got      : '(* -3 6)\n\n'
+TEST: '(()())\r' -> ['',(() ())] -> FAIL (line 54):
+    Expected : '.*\n\\(\\(\\)\\ \\(\\)\\)\\\r'
+    Got      : '(()())\n\n->>'
+Test commas as whitespace
+TEST: '(1 2, 3,,,,),,\r' -> ['',(1 2 3)] -> FAIL (line 58):
+    Expected : '.*\n\\(1\\ 2\\ 3\\)\\\r'
+    Got      : '(1 2, 3,,,,),,\n\n'
+
+-------- Deferrable Functionality --------
+Testing read of nil/true/false
+TEST: 'nil\r' -> ['',nil] -> FAIL (line 68):
+    Expected : '.*\nnil\\\r'
+    Got      : 'nil\n\n(+ 2)'
+TEST: 'true\r' -> ['',true] -> FAIL (line 70):
+    Expected : '.*\ntrue\\\r'
+    Got      : 'true\n\n'
+TEST: 'false\r' -> ['',false] -> FAIL (line 72):
+    Expected : '.*\nfalse\\\r'
+    Got      : 'false\n\n())'
+Testing read of strings
+TEST: '"abc"\r' -> ['',"abc"] -> FAIL (line 76):
+    Expected : '.*\n"abc"\\\r'
+    Got      : '"abc"\n\n'
+TEST: '   "abc"   \r' -> ['',"abc"] -> FAIL (line 78):
+    Expected : '.*\n"abc"\\\r'
+    Got      : '   "abc"   \n\n())'
+TEST: '"abc (with parens)"\r' -> ['',"abc (with parens)"] -> FAIL (line 80):
+    Expected : '.*\n"abc\\ \\(with\\ parens\\)"\\\r'
+    Got      : '"abc (with parens)"\n\n'
+TEST: '"abc\\"def"\r' -> ['',"abc\"def"] -> FAIL (line 82):
+    Expected : '.*\n"abc\\\\"def"\\\r'
+    Got      : '"abc\\"def"\n\n(nil)'
+TEST: '""\r' -> ['',""] -> FAIL (line 84):
+    Expected : '.*\n""\\\r'
+    Got      : '""\n\n'
+TEST: '"\\\\"\r' -> ['',"\\"] -> FAIL (line 86):
+    Expected : '.*\n"\\\\\\\\"\\\r'
+    Got      : '"\\\\"\n\n((3 )))'
+TEST: '"\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"\r' -> ['',"\\\\\\\\\\\\\\\\\\"] -> FAIL (line 88):
+    Expected : '.*\n"\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"\\\r'
+    Got      : '"\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"\n\n'
+TEST: '"&"\r' -> ['',"&"] -> FAIL (line 90):
+    Expected : '.*\n"\\&"\\\r'
+    Got      : '"&"\n\n(+ (+ 3))'
+TEST: '"\'"\r' -> ['',"'"] -> FAIL (line 92):
+    Expected : '.*\n"\'"\\\r'
+    Got      : '"\'"\n\n'
+TEST: '"("\r' -> ['',"("] -> FAIL (line 94):
+    Expected : '.*\n"\\("\\\r'
+    Got      : '"("\n\n(+ (+ 3))'
+TEST: '")"\r' -> ['',")"] -> FAIL (line 96):
+    Expected : '.*\n"\\)"\\\r'
+    Got      : '")"\n\n'
+TEST: '"*"\r' -> ['',"*"] -> FAIL (line 98):
+    Expected : '.*\n"\\*"\\\r'
+    Got      : '"*"\n\n(* 2)'
+TEST: '"+"\r' -> ['',"+"] -> FAIL (line 100):
+    Expected : '.*\n"\\+"\\\r'
+    Got      : '"+"\n\n'
+TEST: '","\r' -> ['',","] -> FAIL (line 102):
+    Expected : '.*\n","\\\r'
+    Got      : '","\n\n(** 2)'
+TEST: '"-"\r' -> ['',"-"] -> FAIL (line 104):
+    Expected : '.*\n"\\-"\\\r'
+    Got      : '"-"\n\n'
+TEST: '"/"\r' -> ['',"/"] -> FAIL (line 106):
+    Expected : '.*\n"/"\\\r'
+    Got      : '"/"\n\n(* 6)'
+TEST: '":"\r' -> ['',":"] -> FAIL (line 108):
+    Expected : '.*\n":"\\\r'
+    Got      : '":"\n\n'
+TEST: '";"\r' -> ['',";"] -> FAIL (line 110):
+    Expected : '.*\n";"\\\r'
+    Got      : '";"\n\n(() )))'
+TEST: '"<"\r' -> ['',"<"] -> FAIL (line 112):
+    Expected : '.*\n"<"\\\r'
+    Got      : '"<"\n\n'
+TEST: '"="\r' -> ['',"="] -> FAIL (line 114):
+    Expected : '.*\n"="\\\r'
+    Got      : '"="\n\n(1 3)'
+TEST: '">"\r' -> ['',">"] -> FAIL (line 116):
+    Expected : '.*\n">"\\\r'
+    Got      : '">"\n\n'
+TEST: '"?"\r' -> ['',"?"] -> FAIL (line 118):
+    Expected : '.*\n"\\?"\\\r'
+    Got      : '"?"\n\nnil'
+TEST: '"@"\r' -> ['',"@"] -> FAIL (line 120):
+    Expected : '.*\n"@"\\\r'
+    Got      : '"@"\n\n'
+TEST: '"["\r' -> ['',"["] -> FAIL (line 122):
+    Expected : '.*\n"\\["\\\r'
+    Got      : '"["\n\ntrue'
+TEST: '"]"\r' -> ['',"]"] -> FAIL (line 124):
+    Expected : '.*\n"\\]"\\\r'
+    Got      : '"]"\n\n'
+TEST: '"^"\r' -> ['',"^"] -> FAIL (line 126):
+    Expected : '.*\n"\\^"\\\r'
+    Got      : '"^"\n\nfalse'
+TEST: '"_"\r' -> ['',"_"] -> FAIL (line 128):
+    Expected : '.*\n"_"\\\r'
+    Got      : '"_"\n\n'
+TEST: '"`"\r' -> ['',"`"] -> FAIL (line 130):
+    Expected : '.*\n"`"\\\r'
+    Got      : '"`"\n\n"abc"'
+TEST: '"{"\r' -> ['',"{"] -> FAIL (line 132):
+    Expected : '.*\n"\\{"\\\r'
+    Got      : '"{"\n\n'
+TEST: '"}"\r' -> ['',"}"] -> FAIL (line 134):
+    Expected : '.*\n"\\}"\\\r'
+    Got      : '"}"\n\n"abc"'
+TEST: '"~"\r' -> ['',"~"] -> FAIL (line 136):
+    Expected : '.*\n"\\~"\\\r'
+    Got      : '"~"\n\n'
+Testing reader errors
+TEST: '(1 2\r' -> ['.*(EOF|end of input|unbalanced).*\r',] -> FAIL (line 140):
+    Expected : '.*\n.*(EOF|end of input|unbalanced).*\r'
+    Got      : '(1 2\n\n"abc (with parens)"'
+TEST: '[1 2\r' -> ['.*(EOF|end of input|unbalanced).*\r',] -> FAIL (line 142):
+    Expected : '.*\n.*(EOF|end of input|unbalanced).*\r'
+    Got      : '[1 2\n\n'
+TEST: '"abc\r' -> ['.*(EOF|end of input|unbalanced).*\r',] -> FAIL (line 146):
+    Expected : '.*\n.*(EOF|end of input|unbalanced).*\r'
+    Got      : '"abc\n\n"abc\\"'
+TEST: '"\r' -> ['.*(EOF|end of input|unbalanced).*\r',] -> FAIL (line 148):
+    Expected : '.*\n.*(EOF|end of input|unbalanced).*\r'
+    Got      : '"\n\n'
+TEST: '"\\"\r' -> ['.*(EOF|end of input|unbalanced).*\r',] -> FAIL (line 150):
+    Expected : '.*\n.*(EOF|end of input|unbalanced).*\r'
+    Got      : '"\\"\n\n""'
+TEST: '"\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"\r' -> ['.*(EOF|end of input|unbalanced).*\r',] -> FAIL (line 152):
+    Expected : '.*\n.*(EOF|end of input|unbalanced).*\r'
+    Got      : '"\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"\n\n'
+TEST: '(1 "abc\r' -> ['.*(EOF|end of input|unbalanced).*\r',] -> FAIL (line 154):
+    Expected : '.*\n.*(EOF|end of input|unbalanced).*\r'
+    Got      : '(1 "abc\n\n"\\\\"'
+TEST: '(1 "abc"\r' -> ['.*(EOF|end of input|unbalanced).*\r',] -> FAIL (line 156):
+    Expected : '.*\n.*(EOF|end of input|unbalanced).*\r'
+    Got      : '(1 "abc"\n\n'
+Testing read of quoting
+TEST: "'1\r" -> ['',(quote 1)] -> FAIL (line 160):
+    Expected : '.*\n\\(quote\\ 1\\)\\\r'
+    Got      : '\'1\n\n"\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"'
+TEST: "'(1 2 3)\r" -> ['',(quote (1 2 3))] -> FAIL (line 162):
+    Expected : '.*\n\\(quote\\ \\(1\\ 2\\ 3\\)\\)\\\r'
+    Got      : "'(1 2 3)\n\n"
+TEST: '`1\r' -> ['',(quasiquote 1)] -> FAIL (line 164):
+    Expected : '.*\n\\(quasiquote\\ 1\\)\\\r'
+    Got      : '`1\n\n"&"'
+TEST: '`(1 2 3)\r' -> ['',(quasiquote (1 2 3))] -> FAIL (line 166):
+    Expected : '.*\n\\(quasiquote\\ \\(1\\ 2\\ 3\\)\\)\\\r'
+    Got      : '`(1 2 3)\n\n'
+TEST: '~1\r' -> ['',(unquote 1)] -> FAIL (line 168):
+    Expected : '.*\n\\(unquote\\ 1\\)\\\r'
+    Got      : '~1\n\n"\'"'
+TEST: '~(1 2 3)\r' -> ['',(unquote (1 2 3))] -> FAIL (line 170):
+    Expected : '.*\n\\(unquote\\ \\(1\\ 2\\ 3\\)\\)\\\r'
+    Got      : '~(1 2 3)\n\n'
+TEST: '`(1 ~a 3)\r' -> ['',(quasiquote (1 (unquote a) 3))] -> FAIL (line 172):
+    Expected : '.*\n\\(quasiquote\\ \\(1\\ \\(unquote\\ a\\)\\ 3\\)\\)\\\r'
+    Got      : '`(1 ~a 3)\n\n"("'
+TEST: '~@(1 2 3)\r' -> ['',(splice-unquote (1 2 3))] -> FAIL (line 174):
+    Expected : '.*\n\\(splice\\-unquote\\ \\(1\\ 2\\ 3\\)\\)\\\r'
+    Got      : '~@(1 2 3)\n\n'
+Testing keywords
+TEST: ':kw\r' -> ['',:kw] -> FAIL (line 179):
+    Expected : '.*\n:kw\\\r'
+    Got      : ':kw\n\n")"'
+TEST: '(:kw1 :kw2 :kw3)\r' -> ['',(:kw1 :kw2 :kw3)] -> FAIL (line 181):
+    Expected : '.*\n\\(:kw1\\ :kw2\\ :kw3\\)\\\r'
+    Got      : '(:kw1 :kw2 :kw3)\n\n'
+Testing read of vectors
+TEST: '[+ 1 2]\r' -> ['',[+ 1 2]] -> FAIL (line 185):
+    Expected : '.*\n\\[\\+\\ 1\\ 2\\]\\\r'
+    Got      : '[+ 1 2]\n\n"*"'
+TEST: '[]\r' -> ['',[]] -> FAIL (line 187):
+    Expected : '.*\n\\[\\]\\\r'
+    Got      : '[]\n\n'
+TEST: '[ ]\r' -> ['',[]] -> FAIL (line 189):
+    Expected : '.*\n\\[\\]\\\r'
+    Got      : '[ ]\n\n"+"'
+TEST: '[[3 4]]\r' -> ['',[[3 4]]] -> FAIL (line 191):
+    Expected : '.*\n\\[\\[3\\ 4\\]\\]\\\r'
+    Got      : '[[3 4]]\n\n'
+TEST: '[+ 1 [+ 2 3]]\r' -> ['',[+ 1 [+ 2 3]]] -> FAIL (line 193):
+    Expected : '.*\n\\[\\+\\ 1\\ \\[\\+\\ 2\\ 3\\]\\]\\\r'
+    Got      : '[+ 1 [+ 2 3]]\n\n","'
+TEST: '  [ +   1   [+   2 3   ]   ]  \r' -> ['',[+ 1 [+ 2 3]]] -> FAIL (line 195):
+    Expected : '.*\n\\[\\+\\ 1\\ \\[\\+\\ 2\\ 3\\]\\]\\\r'
+    Got      : '  [ +   1   [+   2 3   ]   ]  \n\n'
+TEST: '([])\r' -> ['',([])] -> FAIL (line 197):
+    Expected : '.*\n\\(\\[\\]\\)\\\r'
+    Got      : '([])\n\n"-"'
+Testing read of hash maps
+TEST: '{}\r' -> ['',{}] -> FAIL (line 201):
+    Expected : '.*\n\\{\\}\\\r'
+    Got      : '{}\n\n'
+TEST: '{ }\r' -> ['',{}] -> FAIL (line 203):
+    Expected : '.*\n\\{\\}\\\r'
+    Got      : '{ }\n\n"/"'
+TEST: '{"abc" 1}\r' -> ['',{"abc" 1}] -> FAIL (line 205):
+    Expected : '.*\n\\{"abc"\\ 1\\}\\\r'
+    Got      : '{"abc" 1}\n\n'
+TEST: '{"a" {"b" 2}}\r' -> ['',{"a" {"b" 2}}] -> FAIL (line 207):
+    Expected : '.*\n\\{"a"\\ \\{"b"\\ 2\\}\\}\\\r'
+    Got      : '{"a" {"b" 2}}\n\n":"'
+TEST: '{"a" {"b" {"c" 3}}}\r' -> ['',{"a" {"b" {"c" 3}}}] -> FAIL (line 209):
+    Expected : '.*\n\\{"a"\\ \\{"b"\\ \\{"c"\\ 3\\}\\}\\}\\\r'
+    Got      : '{"a" {"b" {"c" 3}}}\n\n'
+TEST: '{  "a"  {"b"   {  "cde"     3   }  }}\r' -> ['',{"a" {"b" {"cde" 3}}}] -> FAIL (line 211):
+    Expected : '.*\n\\{"a"\\ \\{"b"\\ \\{"cde"\\ 3\\}\\}\\}\\\r'
+    Got      : '{  "a"  {"b"   {  "cde"     3   }  }}\n\n";"'
+TEST: '{"a1" 1 "a2" 2 "a3" 3}\r' -> ['{"a([1-3])" \\1 "a(?!\\1)([1-3])" \\2 "a(?!\\1)(?!\\2)([1-3])" \\3}\r',] -> FAIL (line 215):
+    Expected : '.*\n{"a([1-3])" \\1 "a(?!\\1)([1-3])" \\2 "a(?!\\1)(?!\\2)([1-3])" \\3}\r'
+    Got      : '{"a1" 1 "a2" 2 "a3" 3}\n\n'
+TEST: '{  :a  {:b   {  :cde     3   }  }}\r' -> ['',{:a {:b {:cde 3}}}] -> FAIL (line 217):
+    Expected : '.*\n\\{:a\\ \\{:b\\ \\{:cde\\ 3\\}\\}\\}\\\r'
+    Got      : '{  :a  {:b   {  :cde     3   }  }}\n\n"<"'
+TEST: '{"1" 1}\r' -> ['',{"1" 1}] -> FAIL (line 219):
+    Expected : '.*\n\\{"1"\\ 1\\}\\\r'
+    Got      : '{"1" 1}\n\n'
+TEST: '({})\r' -> ['',({})] -> FAIL (line 221):
+    Expected : '.*\n\\(\\{\\}\\)\\\r'
+    Got      : '({})\n\n"="'
+Testing read of comments
+TEST: ' ;; whole line comment (not an exception)\r' -> ['',] -> SUCCESS (result ignored)
+TEST: '1 ; comment after expression\r' -> ['',1] -> FAIL (line 226):
+    Expected : '.*\n1\\\r'
+    Got      : '1 ; comment after expression\n\n">"'
+TEST: '1; comment after expression\r' -> ['',1] -> FAIL (line 228):
+    Expected : '.*\n1\\\r'
+    Got      : '1; comment after expression\n\n'
+Testing read of @/deref
+TEST: '@a\r' -> ['',(deref a)] -> FAIL (line 232):
+    Expected : '.*\n\\(deref\\ a\\)\\\r'
+    Got      : '@a\n\n"?"'
+
+-------- Optional Functionality --------
+Testing read of ^/metadata
+TEST: '^{"a" 1} [1 2 3]\r' -> ['',(with-meta [1 2 3] {"a" 1})] -> SOFT FAIL (line 241):
+    Expected : '.*\n\\(with\\-meta\\ \\[1\\ 2\\ 3\\]\\ \\{"a"\\ 1\\}\\)\\\r'
+    Got      : '^{"a" 1} [1 2 3]\n\n'
+Non alphanumerice characters in strings
+TEST: '"\\n"\r' -> ['',"\n"] -> SOFT FAIL (line 247):
+    Expected : '.*\n"\\\\n"\\\r'
+    Got      : '"\\n"\n\n"@"'
+TEST: '"#"\r' -> ['',"#"] -> SOFT FAIL (line 249):
+    Expected : '.*\n"\\#"\\\r'
+    Got      : '"#"\n\n'
+TEST: '"$"\r' -> ['',"$"] -> SOFT FAIL (line 251):
+    Expected : '.*\n"\\$"\\\r'
+    Got      : '"$"\n\n"["'
+TEST: '"%"\r' -> ['',"%"] -> SOFT FAIL (line 253):
+    Expected : '.*\n"%"\\\r'
+    Got      : '"%"\n\n'
+TEST: '"."\r' -> ['',"."] -> SOFT FAIL (line 255):
+    Expected : '.*\n"\\."\\\r'
+    Got      : '"."\n\n"]"'
+TEST: '"\\\\"\r' -> ['',"\\"] -> SOFT FAIL (line 257):
+    Expected : '.*\n"\\\\\\\\"\\\r'
+    Got      : '"\\\\"\n\n'
+TEST: '"|"\r' -> ['',"|"] -> SOFT FAIL (line 259):
+    Expected : '.*\n"\\|"\\\r'
+    Got      : '"|"\n\n"^"'
+Non alphanumeric characters in comments
+TEST: '1;!\r' -> ['',1] -> SOFT FAIL (line 263):
+    Expected : '.*\n1\\\r'
+    Got      : '1;!\n\n'
+TEST: '1;"\r' -> ['',1] -> SOFT FAIL (line 265):
+    Expected : '.*\n1\\\r'
+    Got      : '1;"\n\n"_"'
+TEST: '1;#\r' -> ['',1] -> SOFT FAIL (line 267):
+    Expected : '.*\n1\\\r'
+    Got      : '1;#\n\n'
+TEST: '1;$\r' -> ['',1] -> SOFT FAIL (line 269):
+    Expected : '.*\n1\\\r'
+    Got      : '1;$\n\n"`"'
+TEST: '1;%\r' -> ['',1] -> SOFT FAIL (line 271):
+    Expected : '.*\n1\\\r'
+    Got      : '1;%\n\n'
+TEST: "1;'\r" -> ['',1] -> SOFT FAIL (line 273):
+    Expected : '.*\n1\\\r'
+    Got      : '1;\'\n\n"{"'
+TEST: '1;\\\r' -> ['',1] -> SOFT FAIL (line 275):
+    Expected : '.*\n1\\\r'
+    Got      : '1;\\\n\n'
+TEST: '1;\\\\\r' -> ['',1] -> SOFT FAIL (line 277):
+    Expected : '.*\n1\\\r'
+    Got      : '1;\\\\\n\n"}"'
+TEST: '1;\\\\\\\r' -> ['',1] -> SOFT FAIL (line 279):
+    Expected : '.*\n1\\\r'
+    Got      : '1;\\\\\\\n\n'
+TEST: '1;`\r' -> ['',1] -> SOFT FAIL (line 281):
+    Expected : '.*\n1\\\r'
+    Got      : '1;`\n\n"~"'
+TEST: '1; &()*+,-./:;<=>?@[]^_{|}~\r' -> ['',] -> SUCCESS (result ignored)
+FIXME: These tests have no reasons to be optional, but...
+fantom fails this one
+TEST: '"!"\r' -> ['',"!"] -> SOFT FAIL (line 288):
+    Expected : '.*\n"!"\\\r'
+    Got      : '"!"\n\n(1 )'
+
+FAILURES:
+FAILED TEST (line 3): 1 -> ['',1]:
+    Expected : '.*\n1\\\r'
+    Got      : '1\n\n1'
+FAILED TEST (line 5): 7 -> ['',7]:
+    Expected : '.*\n7\\\r'
+    Got      : '7\n\n'
+FAILED TEST (line 7):   7    -> ['',7]:
+    Expected : '.*\n7\\\r'
+    Got      : '  7   \n\n7'
+FAILED TEST (line 9): -123 -> ['',-123]:
+    Expected : '.*\n\\-123\\\r'
+    Got      : '-123\n\n'
+FAILED TEST (line 14): + -> ['',+]:
+    Expected : '.*\n\\+\\\r'
+    Got      : '+\n\n7'
+FAILED TEST (line 16): abc -> ['',abc]:
+    Expected : '.*\nabc\\\r'
+    Got      : 'abc\n\n'
+FAILED TEST (line 18):    abc    -> ['',abc]:
+    Expected : '.*\nabc\\\r'
+    Got      : '   abc   \n\n-123'
+FAILED TEST (line 20): abc5 -> ['',abc5]:
+    Expected : '.*\nabc5\\\r'
+    Got      : 'abc5\n\n'
+FAILED TEST (line 22): abc-def -> ['',abc-def]:
+    Expected : '.*\nabc\\-def\\\r'
+    Got      : 'abc-def\n\n+'
+FAILED TEST (line 26): - -> ['',-]:
+    Expected : '.*\n\\-\\\r'
+    Got      : '-\n\n'
+FAILED TEST (line 28): -abc -> ['',-abc]:
+    Expected : '.*\n\\-abc\\\r'
+    Got      : '-abc\n\nabc'
+FAILED TEST (line 30): ->> -> ['',->>]:
+    Expected : '.*\n\\->>\\\r'
+    Got      : '->>\n\n'
+FAILED TEST (line 34): (+ 1 2) -> ['',(+ 1 2)]:
+    Expected : '.*\n\\(\\+\\ 1\\ 2\\)\\\r'
+    Got      : '(+ 1 2)\n\nabc'
+FAILED TEST (line 36): () -> ['',()]:
+    Expected : '.*\n\\(\\)\\\r'
+    Got      : '()\n\n'
+FAILED TEST (line 38): ( ) -> ['',()]:
+    Expected : '.*\n\\(\\)\\\r'
+    Got      : '( )\n\nabc5'
+FAILED TEST (line 40): (nil) -> ['',(nil)]:
+    Expected : '.*\n\\(nil\\)\\\r'
+    Got      : '(nil)\n\n'
+FAILED TEST (line 42): ((3 4)) -> ['',((3 4))]:
+    Expected : '.*\n\\(\\(3\\ 4\\)\\)\\\r'
+    Got      : '((3 4))\n\nabc-def'
+FAILED TEST (line 44): (+ 1 (+ 2 3)) -> ['',(+ 1 (+ 2 3))]:
+    Expected : '.*\n\\(\\+\\ 1\\ \\(\\+\\ 2\\ 3\\)\\)\\\r'
+    Got      : '(+ 1 (+ 2 3))\n\n'
+FAILED TEST (line 46):   ( +   1   (+   2 3   )   )   -> ['',(+ 1 (+ 2 3))]:
+    Expected : '.*\n\\(\\+\\ 1\\ \\(\\+\\ 2\\ 3\\)\\)\\\r'
+    Got      : '  ( +   1   (+   2 3   )   )  \n\n-'
+FAILED TEST (line 48): (* 1 2) -> ['',(* 1 2)]:
+    Expected : '.*\n\\(\\*\\ 1\\ 2\\)\\\r'
+    Got      : '(* 1 2)\n\n'
+FAILED TEST (line 50): (** 1 2) -> ['',(** 1 2)]:
+    Expected : '.*\n\\(\\*\\*\\ 1\\ 2\\)\\\r'
+    Got      : '(** 1 2)\n\n-abc'
+FAILED TEST (line 52): (* -3 6) -> ['',(* -3 6)]:
+    Expected : '.*\n\\(\\*\\ \\-3\\ 6\\)\\\r'
+    Got      : '(* -3 6)\n\n'
+FAILED TEST (line 54): (()()) -> ['',(() ())]:
+    Expected : '.*\n\\(\\(\\)\\ \\(\\)\\)\\\r'
+    Got      : '(()())\n\n->>'
+FAILED TEST (line 58): (1 2, 3,,,,),, -> ['',(1 2 3)]:
+    Expected : '.*\n\\(1\\ 2\\ 3\\)\\\r'
+    Got      : '(1 2, 3,,,,),,\n\n'
+FAILED TEST (line 68): nil -> ['',nil]:
+    Expected : '.*\nnil\\\r'
+    Got      : 'nil\n\n(+ 2)'
+FAILED TEST (line 70): true -> ['',true]:
+    Expected : '.*\ntrue\\\r'
+    Got      : 'true\n\n'
+FAILED TEST (line 72): false -> ['',false]:
+    Expected : '.*\nfalse\\\r'
+    Got      : 'false\n\n())'
+FAILED TEST (line 76): "abc" -> ['',"abc"]:
+    Expected : '.*\n"abc"\\\r'
+    Got      : '"abc"\n\n'
+FAILED TEST (line 78):    "abc"    -> ['',"abc"]:
+    Expected : '.*\n"abc"\\\r'
+    Got      : '   "abc"   \n\n())'
+FAILED TEST (line 80): "abc (with parens)" -> ['',"abc (with parens)"]:
+    Expected : '.*\n"abc\\ \\(with\\ parens\\)"\\\r'
+    Got      : '"abc (with parens)"\n\n'
+FAILED TEST (line 82): "abc\"def" -> ['',"abc\"def"]:
+    Expected : '.*\n"abc\\\\"def"\\\r'
+    Got      : '"abc\\"def"\n\n(nil)'
+FAILED TEST (line 84): "" -> ['',""]:
+    Expected : '.*\n""\\\r'
+    Got      : '""\n\n'
+FAILED TEST (line 86): "\\" -> ['',"\\"]:
+    Expected : '.*\n"\\\\\\\\"\\\r'
+    Got      : '"\\\\"\n\n((3 )))'
+FAILED TEST (line 88): "\\\\\\\\\\\\\\\\\\" -> ['',"\\\\\\\\\\\\\\\\\\"]:
+    Expected : '.*\n"\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"\\\r'
+    Got      : '"\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"\n\n'
+FAILED TEST (line 90): "&" -> ['',"&"]:
+    Expected : '.*\n"\\&"\\\r'
+    Got      : '"&"\n\n(+ (+ 3))'
+FAILED TEST (line 92): "'" -> ['',"'"]:
+    Expected : '.*\n"\'"\\\r'
+    Got      : '"\'"\n\n'
+FAILED TEST (line 94): "(" -> ['',"("]:
+    Expected : '.*\n"\\("\\\r'
+    Got      : '"("\n\n(+ (+ 3))'
+FAILED TEST (line 96): ")" -> ['',")"]:
+    Expected : '.*\n"\\)"\\\r'
+    Got      : '")"\n\n'
+FAILED TEST (line 98): "*" -> ['',"*"]:
+    Expected : '.*\n"\\*"\\\r'
+    Got      : '"*"\n\n(* 2)'
+FAILED TEST (line 100): "+" -> ['',"+"]:
+    Expected : '.*\n"\\+"\\\r'
+    Got      : '"+"\n\n'
+FAILED TEST (line 102): "," -> ['',","]:
+    Expected : '.*\n","\\\r'
+    Got      : '","\n\n(** 2)'
+FAILED TEST (line 104): "-" -> ['',"-"]:
+    Expected : '.*\n"\\-"\\\r'
+    Got      : '"-"\n\n'
+FAILED TEST (line 106): "/" -> ['',"/"]:
+    Expected : '.*\n"/"\\\r'
+    Got      : '"/"\n\n(* 6)'
+FAILED TEST (line 108): ":" -> ['',":"]:
+    Expected : '.*\n":"\\\r'
+    Got      : '":"\n\n'
+FAILED TEST (line 110): ";" -> ['',";"]:
+    Expected : '.*\n";"\\\r'
+    Got      : '";"\n\n(() )))'
+FAILED TEST (line 112): "<" -> ['',"<"]:
+    Expected : '.*\n"<"\\\r'
+    Got      : '"<"\n\n'
+FAILED TEST (line 114): "=" -> ['',"="]:
+    Expected : '.*\n"="\\\r'
+    Got      : '"="\n\n(1 3)'
+FAILED TEST (line 116): ">" -> ['',">"]:
+    Expected : '.*\n">"\\\r'
+    Got      : '">"\n\n'
+FAILED TEST (line 118): "?" -> ['',"?"]:
+    Expected : '.*\n"\\?"\\\r'
+    Got      : '"?"\n\nnil'
+FAILED TEST (line 120): "@" -> ['',"@"]:
+    Expected : '.*\n"@"\\\r'
+    Got      : '"@"\n\n'
+FAILED TEST (line 122): "[" -> ['',"["]:
+    Expected : '.*\n"\\["\\\r'
+    Got      : '"["\n\ntrue'
+FAILED TEST (line 124): "]" -> ['',"]"]:
+    Expected : '.*\n"\\]"\\\r'
+    Got      : '"]"\n\n'
+FAILED TEST (line 126): "^" -> ['',"^"]:
+    Expected : '.*\n"\\^"\\\r'
+    Got      : '"^"\n\nfalse'
+FAILED TEST (line 128): "_" -> ['',"_"]:
+    Expected : '.*\n"_"\\\r'
+    Got      : '"_"\n\n'
+FAILED TEST (line 130): "`" -> ['',"`"]:
+    Expected : '.*\n"`"\\\r'
+    Got      : '"`"\n\n"abc"'
+FAILED TEST (line 132): "{" -> ['',"{"]:
+    Expected : '.*\n"\\{"\\\r'
+    Got      : '"{"\n\n'
+FAILED TEST (line 134): "}" -> ['',"}"]:
+    Expected : '.*\n"\\}"\\\r'
+    Got      : '"}"\n\n"abc"'
+FAILED TEST (line 136): "~" -> ['',"~"]:
+    Expected : '.*\n"\\~"\\\r'
+    Got      : '"~"\n\n'
+FAILED TEST (line 140): (1 2 -> ['.*(EOF|end of input|unbalanced).*\r',]:
+    Expected : '.*\n.*(EOF|end of input|unbalanced).*\r'
+    Got      : '(1 2\n\n"abc (with parens)"'
+FAILED TEST (line 142): [1 2 -> ['.*(EOF|end of input|unbalanced).*\r',]:
+    Expected : '.*\n.*(EOF|end of input|unbalanced).*\r'
+    Got      : '[1 2\n\n'
+FAILED TEST (line 146): "abc -> ['.*(EOF|end of input|unbalanced).*\r',]:
+    Expected : '.*\n.*(EOF|end of input|unbalanced).*\r'
+    Got      : '"abc\n\n"abc\\"'
+FAILED TEST (line 148): " -> ['.*(EOF|end of input|unbalanced).*\r',]:
+    Expected : '.*\n.*(EOF|end of input|unbalanced).*\r'
+    Got      : '"\n\n'
+FAILED TEST (line 150): "\" -> ['.*(EOF|end of input|unbalanced).*\r',]:
+    Expected : '.*\n.*(EOF|end of input|unbalanced).*\r'
+    Got      : '"\\"\n\n""'
+FAILED TEST (line 152): "\\\\\\\\\\\\\\\\\\\" -> ['.*(EOF|end of input|unbalanced).*\r',]:
+    Expected : '.*\n.*(EOF|end of input|unbalanced).*\r'
+    Got      : '"\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"\n\n'
+FAILED TEST (line 154): (1 "abc -> ['.*(EOF|end of input|unbalanced).*\r',]:
+    Expected : '.*\n.*(EOF|end of input|unbalanced).*\r'
+    Got      : '(1 "abc\n\n"\\\\"'
+FAILED TEST (line 156): (1 "abc" -> ['.*(EOF|end of input|unbalanced).*\r',]:
+    Expected : '.*\n.*(EOF|end of input|unbalanced).*\r'
+    Got      : '(1 "abc"\n\n'
+FAILED TEST (line 160): '1 -> ['',(quote 1)]:
+    Expected : '.*\n\\(quote\\ 1\\)\\\r'
+    Got      : '\'1\n\n"\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"'
+FAILED TEST (line 162): '(1 2 3) -> ['',(quote (1 2 3))]:
+    Expected : '.*\n\\(quote\\ \\(1\\ 2\\ 3\\)\\)\\\r'
+    Got      : "'(1 2 3)\n\n"
+FAILED TEST (line 164): `1 -> ['',(quasiquote 1)]:
+    Expected : '.*\n\\(quasiquote\\ 1\\)\\\r'
+    Got      : '`1\n\n"&"'
+FAILED TEST (line 166): `(1 2 3) -> ['',(quasiquote (1 2 3))]:
+    Expected : '.*\n\\(quasiquote\\ \\(1\\ 2\\ 3\\)\\)\\\r'
+    Got      : '`(1 2 3)\n\n'
+FAILED TEST (line 168): ~1 -> ['',(unquote 1)]:
+    Expected : '.*\n\\(unquote\\ 1\\)\\\r'
+    Got      : '~1\n\n"\'"'
+FAILED TEST (line 170): ~(1 2 3) -> ['',(unquote (1 2 3))]:
+    Expected : '.*\n\\(unquote\\ \\(1\\ 2\\ 3\\)\\)\\\r'
+    Got      : '~(1 2 3)\n\n'
+FAILED TEST (line 172): `(1 ~a 3) -> ['',(quasiquote (1 (unquote a) 3))]:
+    Expected : '.*\n\\(quasiquote\\ \\(1\\ \\(unquote\\ a\\)\\ 3\\)\\)\\\r'
+    Got      : '`(1 ~a 3)\n\n"("'
+FAILED TEST (line 174): ~@(1 2 3) -> ['',(splice-unquote (1 2 3))]:
+    Expected : '.*\n\\(splice\\-unquote\\ \\(1\\ 2\\ 3\\)\\)\\\r'
+    Got      : '~@(1 2 3)\n\n'
+FAILED TEST (line 179): :kw -> ['',:kw]:
+    Expected : '.*\n:kw\\\r'
+    Got      : ':kw\n\n")"'
+FAILED TEST (line 181): (:kw1 :kw2 :kw3) -> ['',(:kw1 :kw2 :kw3)]:
+    Expected : '.*\n\\(:kw1\\ :kw2\\ :kw3\\)\\\r'
+    Got      : '(:kw1 :kw2 :kw3)\n\n'
+FAILED TEST (line 185): [+ 1 2] -> ['',[+ 1 2]]:
+    Expected : '.*\n\\[\\+\\ 1\\ 2\\]\\\r'
+    Got      : '[+ 1 2]\n\n"*"'
+FAILED TEST (line 187): [] -> ['',[]]:
+    Expected : '.*\n\\[\\]\\\r'
+    Got      : '[]\n\n'
+FAILED TEST (line 189): [ ] -> ['',[]]:
+    Expected : '.*\n\\[\\]\\\r'
+    Got      : '[ ]\n\n"+"'
+FAILED TEST (line 191): [[3 4]] -> ['',[[3 4]]]:
+    Expected : '.*\n\\[\\[3\\ 4\\]\\]\\\r'
+    Got      : '[[3 4]]\n\n'
+FAILED TEST (line 193): [+ 1 [+ 2 3]] -> ['',[+ 1 [+ 2 3]]]:
+    Expected : '.*\n\\[\\+\\ 1\\ \\[\\+\\ 2\\ 3\\]\\]\\\r'
+    Got      : '[+ 1 [+ 2 3]]\n\n","'
+FAILED TEST (line 195):   [ +   1   [+   2 3   ]   ]   -> ['',[+ 1 [+ 2 3]]]:
+    Expected : '.*\n\\[\\+\\ 1\\ \\[\\+\\ 2\\ 3\\]\\]\\\r'
+    Got      : '  [ +   1   [+   2 3   ]   ]  \n\n'
+FAILED TEST (line 197): ([]) -> ['',([])]:
+    Expected : '.*\n\\(\\[\\]\\)\\\r'
+    Got      : '([])\n\n"-"'
+FAILED TEST (line 201): {} -> ['',{}]:
+    Expected : '.*\n\\{\\}\\\r'
+    Got      : '{}\n\n'
+FAILED TEST (line 203): { } -> ['',{}]:
+    Expected : '.*\n\\{\\}\\\r'
+    Got      : '{ }\n\n"/"'
+FAILED TEST (line 205): {"abc" 1} -> ['',{"abc" 1}]:
+    Expected : '.*\n\\{"abc"\\ 1\\}\\\r'
+    Got      : '{"abc" 1}\n\n'
+FAILED TEST (line 207): {"a" {"b" 2}} -> ['',{"a" {"b" 2}}]:
+    Expected : '.*\n\\{"a"\\ \\{"b"\\ 2\\}\\}\\\r'
+    Got      : '{"a" {"b" 2}}\n\n":"'
+FAILED TEST (line 209): {"a" {"b" {"c" 3}}} -> ['',{"a" {"b" {"c" 3}}}]:
+    Expected : '.*\n\\{"a"\\ \\{"b"\\ \\{"c"\\ 3\\}\\}\\}\\\r'
+    Got      : '{"a" {"b" {"c" 3}}}\n\n'
+FAILED TEST (line 211): {  "a"  {"b"   {  "cde"     3   }  }} -> ['',{"a" {"b" {"cde" 3}}}]:
+    Expected : '.*\n\\{"a"\\ \\{"b"\\ \\{"cde"\\ 3\\}\\}\\}\\\r'
+    Got      : '{  "a"  {"b"   {  "cde"     3   }  }}\n\n";"'
+FAILED TEST (line 215): {"a1" 1 "a2" 2 "a3" 3} -> ['{"a([1-3])" \\1 "a(?!\\1)([1-3])" \\2 "a(?!\\1)(?!\\2)([1-3])" \\3}\r',]:
+    Expected : '.*\n{"a([1-3])" \\1 "a(?!\\1)([1-3])" \\2 "a(?!\\1)(?!\\2)([1-3])" \\3}\r'
+    Got      : '{"a1" 1 "a2" 2 "a3" 3}\n\n'
+FAILED TEST (line 217): {  :a  {:b   {  :cde     3   }  }} -> ['',{:a {:b {:cde 3}}}]:
+    Expected : '.*\n\\{:a\\ \\{:b\\ \\{:cde\\ 3\\}\\}\\}\\\r'
+    Got      : '{  :a  {:b   {  :cde     3   }  }}\n\n"<"'
+FAILED TEST (line 219): {"1" 1} -> ['',{"1" 1}]:
+    Expected : '.*\n\\{"1"\\ 1\\}\\\r'
+    Got      : '{"1" 1}\n\n'
+FAILED TEST (line 221): ({}) -> ['',({})]:
+    Expected : '.*\n\\(\\{\\}\\)\\\r'
+    Got      : '({})\n\n"="'
+FAILED TEST (line 226): 1 ; comment after expression -> ['',1]:
+    Expected : '.*\n1\\\r'
+    Got      : '1 ; comment after expression\n\n">"'
+FAILED TEST (line 228): 1; comment after expression -> ['',1]:
+    Expected : '.*\n1\\\r'
+    Got      : '1; comment after expression\n\n'
+FAILED TEST (line 232): @a -> ['',(deref a)]:
+    Expected : '.*\n\\(deref\\ a\\)\\\r'
+    Got      : '@a\n\n"?"'
+SOFT FAILED TEST (line 241): ^{"a" 1} [1 2 3] -> ['',(with-meta [1 2 3] {"a" 1})]:
+    Expected : '.*\n\\(with\\-meta\\ \\[1\\ 2\\ 3\\]\\ \\{"a"\\ 1\\}\\)\\\r'
+    Got      : '^{"a" 1} [1 2 3]\n\n'
+SOFT FAILED TEST (line 247): "\n" -> ['',"\n"]:
+    Expected : '.*\n"\\\\n"\\\r'
+    Got      : '"\\n"\n\n"@"'
+SOFT FAILED TEST (line 249): "#" -> ['',"#"]:
+    Expected : '.*\n"\\#"\\\r'
+    Got      : '"#"\n\n'
+SOFT FAILED TEST (line 251): "$" -> ['',"$"]:
+    Expected : '.*\n"\\$"\\\r'
+    Got      : '"$"\n\n"["'
+SOFT FAILED TEST (line 253): "%" -> ['',"%"]:
+    Expected : '.*\n"%"\\\r'
+    Got      : '"%"\n\n'
+SOFT FAILED TEST (line 255): "." -> ['',"."]:
+    Expected : '.*\n"\\."\\\r'
+    Got      : '"."\n\n"]"'
+SOFT FAILED TEST (line 257): "\\" -> ['',"\\"]:
+    Expected : '.*\n"\\\\\\\\"\\\r'
+    Got      : '"\\\\"\n\n'
+SOFT FAILED TEST (line 259): "|" -> ['',"|"]:
+    Expected : '.*\n"\\|"\\\r'
+    Got      : '"|"\n\n"^"'
+SOFT FAILED TEST (line 263): 1;! -> ['',1]:
+    Expected : '.*\n1\\\r'
+    Got      : '1;!\n\n'
+SOFT FAILED TEST (line 265): 1;" -> ['',1]:
+    Expected : '.*\n1\\\r'
+    Got      : '1;"\n\n"_"'
+SOFT FAILED TEST (line 267): 1;# -> ['',1]:
+    Expected : '.*\n1\\\r'
+    Got      : '1;#\n\n'
+SOFT FAILED TEST (line 269): 1;$ -> ['',1]:
+    Expected : '.*\n1\\\r'
+    Got      : '1;$\n\n"`"'
+SOFT FAILED TEST (line 271): 1;% -> ['',1]:
+    Expected : '.*\n1\\\r'
+    Got      : '1;%\n\n'
+SOFT FAILED TEST (line 273): 1;' -> ['',1]:
+    Expected : '.*\n1\\\r'
+    Got      : '1;\'\n\n"{"'
+SOFT FAILED TEST (line 275): 1;\ -> ['',1]:
+    Expected : '.*\n1\\\r'
+    Got      : '1;\\\n\n'
+SOFT FAILED TEST (line 277): 1;\\ -> ['',1]:
+    Expected : '.*\n1\\\r'
+    Got      : '1;\\\\\n\n"}"'
+SOFT FAILED TEST (line 279): 1;\\\ -> ['',1]:
+    Expected : '.*\n1\\\r'
+    Got      : '1;\\\\\\\n\n'
+SOFT FAILED TEST (line 281): 1;` -> ['',1]:
+    Expected : '.*\n1\\\r'
+    Got      : '1;`\n\n"~"'
+SOFT FAILED TEST (line 288): "!" -> ['',"!"]:
+    Expected : '.*\n"!"\\\r'
+    Got      : '"!"\n\n(1 )'
+
+TEST RESULTS (for ../tests/step1_read_print.mal):
+   19: soft failing tests
+   96: failing tests
+    2: passing tests
+  117: total tests
+

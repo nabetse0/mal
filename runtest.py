@@ -13,6 +13,9 @@ import pty, array, fcntl, termios
 
 IS_PY_3 = sys.version_info[0] == 3
 
+CTRL_CHARS = "".join(map(chr, list(range(0x00, 0x20)) + list(range(0x7f, 0xa0))))
+ctrl_char_re = re.compile("[{}]".format(CTRL_CHARS))
+
 debug_file = None
 log_file = None
 
@@ -27,6 +30,14 @@ def log(data, end='\n'):
         log_file.flush()
     print(data, end=end)
     sys.stdout.flush()
+
+print("++++++++++++++++++++++++++++++++++++++++++")
+print("++++++++++++++++++++++++++++++++++++++++++")
+print("++++++++++++++++++++++++++++++++++++++++++")
+print("++++++++++++++++++++++++++++++++++++++++++")
+print("++++++++++++++++++++++++++++++++++++++++++")
+print("++++++++++++++++++++++++++++++++++++++++++")
+print("++++++++++++++++++++++++++++++++++++++++++")
 
 sep = "\n"
 rundir = None
@@ -138,11 +149,12 @@ class Runner():
                         return buf
         return None
 
-    def writeline(self, str):
+    def writeline(self, the_str):
         def _to_bytes(s):
             return bytes(s, "utf-8") if IS_PY_3 else s
 
-        self.stdin.write(_to_bytes(str.replace('\r', '\x16\r') + self.line_break))
+        # self.stdin.write(_to_bytes(str.replace('\r', '\x16\r') + self.line_break))
+        self.stdin.write(_to_bytes(the_str + self.line_break))
 
     def cleanup(self):
         #print "cleaning up"
@@ -266,6 +278,7 @@ failures = []
 
 class TestTimeout(Exception):
     pass
+
 
 while t.next():
     if args.deferrable == False and t.deferrable:
